@@ -4,13 +4,13 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from bot import PatreonMemberRolesBot
+from bot import WardogsBot
 
 
 class OtherCommands(commands.Cog):
     """Other commands"""
 
-    def __init__(self, bot: PatreonMemberRolesBot):
+    def __init__(self, bot: WardogsBot):
         self.bot = bot
 
     @app_commands.command(name="help", description="See more info about the bot")
@@ -25,6 +25,6 @@ class OtherCommands(commands.Cog):
         await interaction.followup.send(embed=embed)
 
 
-async def setup(bot: PatreonMemberRolesBot) -> None:
+async def setup(bot: WardogsBot) -> None:
     """Setup the cog within discord.py lib"""
     await bot.add_cog(OtherCommands(bot))

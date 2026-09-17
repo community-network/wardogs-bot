@@ -7,13 +7,13 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
-from bot import PatreonMemberRolesBot
+from bot import WardogsBot
 
 
 class Sync(commands.Cog):
     """Syncs the slashcommands to discord"""
 
-    def __init__(self, bot: PatreonMemberRolesBot):
+    def __init__(self, bot: WardogsBot):
         self.bot = bot
         self.logger = logging.getLogger("sync")
 
@@ -73,6 +73,6 @@ class Sync(commands.Cog):
         await interaction.followup.send(f"Failed to sync:\n{error}")
 
 
-async def setup(bot: PatreonMemberRolesBot) -> None:
+async def setup(bot: WardogsBot) -> None:
     """Setup the cog within discord.py lib"""
     await bot.add_cog(Sync(bot), guild=discord.Object(770746735533228083))

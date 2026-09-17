@@ -15,7 +15,7 @@ logger = logging.getLogger("bot")
 setup_logger(logger)
 
 
-class PatreonMemberRolesBot(commands.AutoShardedBot):
+class WardogsBot(commands.AutoShardedBot):
     """Bot setup class."""
 
     def __init__(self, *args, **kwargs):
@@ -40,7 +40,7 @@ class PatreonMemberRolesBot(commands.AutoShardedBot):
 
 intents = discord.Intents.default()
 intents.members = True
-bot = PatreonMemberRolesBot(command_prefix="!", intents=intents)
+bot = WardogsBot(command_prefix="!", intents=intents)
 
 
 @bot.event
