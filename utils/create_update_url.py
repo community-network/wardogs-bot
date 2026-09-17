@@ -5,12 +5,13 @@ import jwt
 from config import DiscordBot
 
 
-def create_update_url(config: DiscordBot, discord_id: str) -> str:
+def create_update_url(config: DiscordBot, discord_id: str, display_name: str) -> str:
     """
     Create a one-time URL associated with a Discord user.
     """
 
     state = {
+        "display_name": display_name,
         "discord_id": str(discord_id),
         "created_at": time.time(),
     }

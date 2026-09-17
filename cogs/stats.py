@@ -17,7 +17,9 @@ class Stats(commands.Cog):
         name="update", description="Sign in with Steam and update your WARDOGS stats."
     )
     async def update(self, interaction: discord.Interaction):
-        login_url = create_update_url(self.bot.config.bot, str(interaction.user.id))
+        login_url = create_update_url(
+            self.bot.config.bot, str(interaction.user.id), interaction.user.display_name
+        )
         view = discord.ui.View(timeout=600)
         view.add_item(
             discord.ui.Button(
