@@ -2,6 +2,7 @@ import threading
 import time
 import uuid
 
+import discord
 import jwt
 
 from config import DiscordBot
@@ -31,14 +32,15 @@ def create_update_url(
 
 
 def create_pending_state(
-    state, server_id: int | None, channel_id: int | None, message_id: int | None
+    state, interaction: discord.Interaction, message_id: int | None
 ):
     with _state_lock:
         _cleanup_expired_states_locked()
         _pending_states[state] = {
-            "server_id": server_id,
-            "channel_id": channel_id,
+            "server_id": interaction.guild_id,
+            "channel_id": interaction.channel_id,
             "message_id": message_id,
+            "discord_id": interaction.user.id,
             "created_at": time.time(),
         }
 

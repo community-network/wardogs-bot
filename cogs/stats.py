@@ -50,9 +50,7 @@ class Stats(commands.Cog):
             view=view,
             ephemeral=True,
         )
-        create_pending_state(
-            id, interaction.guild_id, interaction.channel_id, msg.message_id
-        )
+        create_pending_state(id, interaction, msg.message_id)
 
     @app_commands.command(
         name="stats",
