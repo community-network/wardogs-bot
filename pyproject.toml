@@ -20,6 +20,7 @@ dependencies = [
     "microsoft-kiota-serialization-text (>=1.11.9,<2.0.0)",
     "microsoft-kiota-serialization-form (>=1.11.9,<2.0.0)",
     "microsoft-kiota-serialization-multipart (>=1.11.9,<2.0.0)",
+    "fastapi[standard] (>=0.141.1,<0.142.0)",
 ]
 
 

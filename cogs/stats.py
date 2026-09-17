@@ -8,9 +8,8 @@ from kiota_abstractions.base_request_configuration import RequestConfiguration
 from kiota_http.httpx_request_adapter import HttpxRequestAdapter
 
 from bot import WardogsBot
-from client.stats.stats_request_builder import StatsRequestBuilder
 from client.wardogs_api import WardogsApi
-from utils.create_update_url import create_update_url
+from utils.create_update_url import create_pending_state, create_update_url
 
 
 class Stats(commands.Cog):
@@ -24,7 +23,7 @@ class Stats(commands.Cog):
         name="update", description="Sign in with Steam and update your WARDOGS stats."
     )
     async def update_command(self, interaction: discord.Interaction):
-        login_url = create_update_url(
+        login_url, id = create_update_url(
             self.bot.config.bot, interaction.user.id, interaction.user.display_name
         )
         view = discord.ui.View(timeout=600)
@@ -46,10 +45,13 @@ class Stats(commands.Cog):
             ),
         )
 
-        await interaction.response.send_message(
+        msg = await interaction.response.send_message(
             embed=embed,
             view=view,
             ephemeral=True,
+        )
+        create_pending_state(
+            id, interaction.guild_id, interaction.channel_id, msg.message_id
         )
 
     @app_commands.command(

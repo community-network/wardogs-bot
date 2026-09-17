@@ -4,10 +4,14 @@ import os
 
 import discord
 from discord.ext import commands
+from fastapi import FastAPI, Query
+from fastapi.concurrency import asynccontextmanager
+import jwt
 
 from config import load_config
 from database.connection import DatabaseSingleton
 from logger import setup_logger
+from utils.create_update_url import _consume_pending_state, _get_pending_state
 
 env_config = load_config()
 
@@ -38,9 +42,18 @@ class WardogsBot(commands.AutoShardedBot):
                 self.logger.info(f"Loaded cog: {name}")
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    asyncio.create_task(bot.start(env_config.bot.discord_bot_token))
+    yield
+    await bot.close()
+
+
 intents = discord.Intents.default()
 intents.members = True
 bot = WardogsBot(command_prefix="!", intents=intents)
+
+app = FastAPI(lifespan=lifespan)
 
 
 @bot.event
@@ -67,10 +80,22 @@ async def on_command_error(ctx, error):
         raise error
 
 
-async def main() -> None:
-    async with bot:
-        await bot.start(env_config.bot.discord_bot_token)
+@app.post("/notify")
+async def notify(
+    state_id: str = Query(
+        "",
+        description="Channel id",
+    ),
+):
+    state = _get_pending_state(state_id)
+    if state is None:
+        return {"error": "State invalid"}
 
+    channel = bot.get_channel(state.get("channel_id", ""))
+    if channel is None:
+        return {"error": "Channel not found"}
+    # message = await channel.fetch_message(state.get("message_id", ""))
+    await channel.send("test")
 
-if __name__ == "__main__":
-    asyncio.run(main())
+    _consume_pending_state(state_id)
+    return {"ok": True}
