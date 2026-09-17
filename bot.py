@@ -12,6 +12,7 @@ from config import load_config
 from database.connection import DatabaseSingleton
 from logger import setup_logger
 from utils.create_update_url import _consume_pending_state, _get_pending_state
+from utils.wardogs_api_client import create_stats_embed
 
 env_config = load_config()
 
@@ -94,8 +95,15 @@ async def notify(
     channel = bot.get_channel(state.get("channel_id", ""))
     if channel is None:
         return {"error": "Channel not found"}
-    # message = await channel.fetch_message(state.get("message_id", ""))
-    await channel.send("test")
+    message = await channel.fetch_message(state.get("message_id", ""))
+
+    embed = await create_stats_embed(bot.config, state.get("discord_id", ""))
+    if embed is not None:
+        await message.edit(embed=embed)
+    else:
+        await message.edit(
+            content="Your WARDOGS account is linked, but no stat snapshot has been saved yet.",
+        )
 
     _consume_pending_state(state_id)
     return {"ok": True}
