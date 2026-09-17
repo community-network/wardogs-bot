@@ -1,0 +1,1 @@
+kiota generate -l python -c WardogsApi -n client -d https://wardogs-api.gametools.network/openapi.json -o ./client  
