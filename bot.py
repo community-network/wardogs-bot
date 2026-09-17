@@ -49,6 +49,24 @@ async def on_ready():
     await bot.tree.sync()
 
 
+@bot.event
+async def on_command_error(ctx, error):
+    """dont give a error if a command doesn't exist"""
+    if isinstance(error, commands.MissingPermissions):
+        embed = discord.Embed(
+            color=0xE74C3C, description="Your not allowed to use this command"
+        )
+        await ctx.send(embed=embed)
+    elif isinstance(error, commands.NoPrivateMessage):
+        embed = discord.Embed(
+            color=0xE74C3C,
+            description="This command can only be used within a community, not in DM",
+        )
+        await ctx.send(embed=embed)
+    else:
+        raise error
+
+
 async def main() -> None:
     async with bot:
         await bot.start(env_config.bot.discord_bot_token)

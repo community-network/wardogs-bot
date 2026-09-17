@@ -9,6 +9,8 @@ from utils.create_update_url import create_update_url
 
 
 class Stats(commands.Cog):
+    """Stats commands"""
+
     def __init__(self, bot: WardogsBot):
         self.bot = bot
         self.logger = logging.getLogger("admin")
@@ -16,9 +18,9 @@ class Stats(commands.Cog):
     @app_commands.command(
         name="update", description="Sign in with Steam and update your WARDOGS stats."
     )
-    async def update(self, interaction: discord.Interaction):
+    async def update_command(self, interaction: discord.Interaction):
         login_url = create_update_url(
-            self.bot.config.bot, str(interaction.user.id), interaction.user.display_name
+            self.bot.config.bot, interaction.user.id, interaction.user.display_name
         )
         view = discord.ui.View(timeout=600)
         view.add_item(
