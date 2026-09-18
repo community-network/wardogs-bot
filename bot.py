@@ -95,15 +95,24 @@ async def notify(
     channel = bot.get_channel(state.get("channel_id", ""))
     if channel is None:
         return {"error": "Channel not found"}
-    message = await channel.fetch_message(state.get("message_id", ""))
 
-    embed = await create_stats_embed(bot.config, state.get("discord_id", ""))
-    if embed is not None:
-        await message.edit(embed=embed)
-    else:
-        await message.edit(
-            content="Your WARDOGS account is linked, but no stat snapshot has been saved yet.",
-        )
+    if (
+        isinstance(channel, discord.abc.GuildChannel)
+        and not isinstance(channel, discord.CategoryChannel)
+        and not isinstance(channel, discord.ForumChannel)
+    ):
+        embed = await create_stats_embed(bot.config, state.get("discord_id", ""))
+        if embed is not None:
+            await channel.send(content=f"<@{state.get('discord_id', '')}>", embed=embed)
+        else:
+            await channel.send(
+                content=f"<@{state.get('discord_id', '')}> Your WARDOGS account is linked, but no stat snapshot has been saved yet.",
+            )
+
+        message = await channel.fetch_message(state.get("message_id", ""))
+        if message is not None:
+            await channel.delete_messages([message])
 
     _consume_pending_state(state_id)
+
     return {"ok": True}
