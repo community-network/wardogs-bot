@@ -51,7 +51,7 @@ class Stats(commands.Cog):
             view=view,
             ephemeral=True,
         )
-        create_pending_state(id, interaction, msg.message_id)
+        create_pending_state(id, interaction, msg.id)
 
     @app_commands.command(
         name="stats",
