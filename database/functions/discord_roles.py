@@ -7,9 +7,9 @@ from database.dto import DiscordRole
 
 async def get(
     session: AsyncSession,
-    name: str,
-) -> str | None:
-    stmt = select(DiscordRole.name).filter(DiscordRole.name == name).limit(1)
+    id: int,
+) -> DiscordRole | None:
+    stmt = select(DiscordRole).filter(DiscordRole.id == id).limit(1)
     result = await session.execute(stmt)
     return result.scalar_one_or_none()
 
@@ -41,3 +41,9 @@ async def create(
     result = await session.execute(stmt)
     await session.commit()
     return result.scalar_one()
+
+
+async def remove(session: AsyncSession, role_id: int):
+    voice_channel = await get(session, role_id)
+    await session.delete(voice_channel)
+    await session.commit()
