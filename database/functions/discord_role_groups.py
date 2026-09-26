@@ -21,7 +21,8 @@ async def get_by_name(
 ) -> DiscordRoleGroup | None:
     stmt = (
         select(DiscordRoleGroup)
-        .filter(DiscordRoleGroup.guild_id == guild_id and DiscordRoleGroup.name == name)
+        .filter(DiscordRoleGroup.guild_id == guild_id)
+        .filter(DiscordRoleGroup.name == name)
         .limit(1)
     )
     result = await session.execute(stmt)

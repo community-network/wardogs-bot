@@ -78,6 +78,7 @@ class Admin(commands.Cog):
                 await interaction.followup.send(
                     "Role group already exists", ephemeral=True
                 )
+                return
 
             role_group = await discord_role_groups.create(
                 session, interaction.guild.id, stats_item.value
