@@ -34,8 +34,8 @@ async def sync_roles(bot: commands.AutoShardedBot, state: dict, stats: PlayerSta
                         continue
 
                     should_have_role = (
-                        level <= db_role.role_range_min
-                        and level > db_role.role_range_max
+                        level >= db_role.role_range_min
+                        and level < db_role.role_range_max
                     )
                     cur_role = member.get_role(db_role.id)
 
