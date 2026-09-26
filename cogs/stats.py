@@ -3,16 +3,11 @@ import logging
 import discord
 from discord import app_commands
 from discord.ext import commands
-from kiota_abstractions.authentication import AnonymousAuthenticationProvider
-from kiota_abstractions.base_request_configuration import RequestConfiguration
-from kiota_http.httpx_request_adapter import HttpxRequestAdapter
 
 from bot import WardogsBot
-from client.wardogs_api import WardogsApi
 from utils.create_update_url import create_pending_state, create_update_url
 from utils.wardogs_api_client import (
     create_stats_embed,
-    create_wardogs_client,
     get_stats,
 )
 
@@ -61,13 +56,17 @@ class Stats(commands.Cog):
         name="stats",
         description="Show your stats WARDOGS stats.",
     )
-    async def stats(self, interaction: discord.Interaction):
-        stats = await get_stats(self.bot.config, interaction.user.id)
+    async def stats(
+        self, interaction: discord.Interaction, member: discord.Member | None = None
+    ):
+        await interaction.response.defer()
+        user = member or interaction.user
+        stats = await get_stats(self.bot.config, user.id)
         if stats is not None:
             embed = create_stats_embed(stats)
-            await interaction.response.send_message(embed=embed)
+            await interaction.followup.send(embed=embed)
         else:
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 "Your WARDOGS account is linked, but no stat snapshot has been saved yet.",
                 ephemeral=True,
             )
