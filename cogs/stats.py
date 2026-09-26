@@ -10,7 +10,11 @@ from kiota_http.httpx_request_adapter import HttpxRequestAdapter
 from bot import WardogsBot
 from client.wardogs_api import WardogsApi
 from utils.create_update_url import create_pending_state, create_update_url
-from utils.wardogs_api_client import create_stats_embed, create_wardogs_client
+from utils.wardogs_api_client import (
+    create_stats_embed,
+    create_wardogs_client,
+    get_stats,
+)
 
 
 class Stats(commands.Cog):
@@ -58,8 +62,9 @@ class Stats(commands.Cog):
         description="Show your stats WARDOGS stats.",
     )
     async def stats(self, interaction: discord.Interaction):
-        embed = await create_stats_embed(self.bot.config, interaction.user.id)
-        if embed is not None:
+        stats = await get_stats(self.bot.config, interaction.user.id)
+        if stats is not None:
+            embed = create_stats_embed(stats)
             await interaction.response.send_message(embed=embed)
         else:
             await interaction.response.send_message(

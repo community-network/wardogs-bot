@@ -6,13 +6,13 @@ import discord
 from discord.ext import commands
 from fastapi import FastAPI, Query
 from fastapi.concurrency import asynccontextmanager
-import jwt
 
 from config import load_config
 from database.connection import DatabaseSingleton
 from logger import setup_logger
 from utils.create_update_url import _consume_pending_state, _get_pending_state
-from utils.wardogs_api_client import create_stats_embed
+from utils.sync_roles import sync_roles
+from utils.wardogs_api_client import create_stats_embed, get_stats
 
 env_config = load_config()
 
@@ -48,12 +48,12 @@ async def lifespan(app: FastAPI):
     asyncio.create_task(bot.start(env_config.bot.discord_bot_token))
     yield
     await bot.close()
+    await bot.db.close_async()
 
 
 intents = discord.Intents.default()
 intents.members = True
 bot = WardogsBot(command_prefix="!", intents=intents)
-
 app = FastAPI(lifespan=lifespan)
 
 
@@ -102,8 +102,10 @@ async def notify(
             and not isinstance(channel, discord.CategoryChannel)
             and not isinstance(channel, discord.ForumChannel)
         ):
-            embed = await create_stats_embed(bot.config, state.get("discord_id", ""))
-            if embed is not None:
+            stats = await get_stats(bot.config, state.get("discord_id", ""))
+            if stats is not None:
+                await sync_roles(bot, state, stats)
+                embed = create_stats_embed(stats)
                 await channel.send(
                     content=f"<@{state.get('discord_id', '')}>", embed=embed
                 )
