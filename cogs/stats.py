@@ -1,8 +1,10 @@
 import logging
+import traceback
 
 import discord
 from discord import app_commands
 from discord.ext import commands
+from kiota_abstractions.api_error import APIError
 
 from bot import WardogsBot
 from utils.create_update_url import create_pending_state, create_update_url
@@ -61,15 +63,26 @@ class Stats(commands.Cog):
     ):
         await interaction.response.defer()
         user = member or interaction.user
-        stats = await get_stats(self.bot.config, user.id)
-        if stats is not None:
-            embed = create_stats_embed(stats)
-            await interaction.followup.send(embed=embed)
-        else:
+        try:
+            stats = await get_stats(self.bot.config, user.id)
+            if stats is not None:
+                embed = create_stats_embed(stats)
+                await interaction.followup.send(embed=embed)
+            else:
+                await interaction.followup.send(
+                    "Your WARDOGS account is linked, but no stat snapshot has been saved yet.",
+                    ephemeral=True,
+                )
+        except APIError as exc:
             await interaction.followup.send(
-                "Your WARDOGS account is linked, but no stat snapshot has been saved yet.",
+                "Could not get any stats for the requested user.",
                 ephemeral=True,
             )
+            if exc.response_status_code != 404:
+                self.logger.error(
+                    f"Could not get stats for user {interaction.user.name}: {type(exc).__name__}: {exc}",
+                    traceback.format_exc(),
+                )
 
 
 async def setup(bot: WardogsBot) -> None:
