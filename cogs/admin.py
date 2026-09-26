@@ -120,7 +120,7 @@ class Admin(commands.Cog):
                     session, interaction.guild.id, stats_item
                 )
                 if role_group is None:
-                    await interaction.response.send_message(
+                    await interaction.followup.send(
                         "Role does not exist", ephemeral=True
                     )
                     return
