@@ -23,7 +23,7 @@ class DiscordRoleGroup(Base):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     name: Mapped[str]
     guild_id: Mapped[int] = mapped_column(
-        ForeignKey("server_settings.id", ondelete="cascade"),
+        ForeignKey("server_settings.server_id", ondelete="cascade"),
         nullable=False,
         primary_key=True,
     )
