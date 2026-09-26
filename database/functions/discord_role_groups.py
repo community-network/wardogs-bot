@@ -16,24 +16,32 @@ async def get(
 
 async def get_by_name(
     session: AsyncSession,
+    guild_id: int,
     name: str,
 ) -> DiscordRoleGroup | None:
-    stmt = select(DiscordRoleGroup).filter(DiscordRoleGroup.name == name).limit(1)
+    stmt = (
+        select(DiscordRoleGroup)
+        .filter(DiscordRoleGroup.guild_id == guild_id)
+        .filter(DiscordRoleGroup.name == name)
+        .limit(1)
+    )
     result = await session.execute(stmt)
     return result.scalar_one_or_none()
 
 
-async def get_all(session: AsyncSession) -> list[DiscordRoleGroup]:
-    stmt = select(DiscordRoleGroup)
+async def get_all(session: AsyncSession, guild_id: int) -> list[DiscordRoleGroup]:
+    stmt = select(DiscordRoleGroup).filter(DiscordRoleGroup.guild_id == guild_id)
     result = await session.execute(stmt)
     return [item for item in result.scalars().all()]
 
 
 async def create(
     session: AsyncSession,
+    guild_id: int,
     name: str,
 ) -> DiscordRoleGroup:
     channel = {
+        "guild_id": guild_id,
         "name": name,
     }
     stmt = insert(DiscordRoleGroup).values(channel).returning(DiscordRoleGroup)

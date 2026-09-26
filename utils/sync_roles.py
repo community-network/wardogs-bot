@@ -20,7 +20,9 @@ async def sync_roles(bot: commands.AutoShardedBot, state: dict, stats: PlayerSta
 
     async with bot.db.create_session() as session:
         try:
-            role_groups = await discord_role_groups.get_all(session)
+            role_groups = await discord_role_groups.get_all(
+                session, state.get("server_id", 0)
+            )
             for role_group in role_groups:
                 for db_role in await role_group.awaitable_attrs.discord_roles:
                     level: int | None = None

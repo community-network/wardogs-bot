@@ -9,6 +9,7 @@ from fastapi.concurrency import asynccontextmanager
 
 from config import load_config
 from database.connection import DatabaseSingleton
+from database.functions import server_settings
 from logger import setup_logger
 from utils.create_update_url import _consume_pending_state, _get_pending_state
 from utils.sync_roles import sync_roles
@@ -33,6 +34,12 @@ class WardogsBot(commands.AutoShardedBot):
         await self.db.init_db()
         self.remove_command("help")
         await self.load_cogs()
+        async with self.db.create_session() as session:
+            async for guild in self.fetch_guilds():
+                if not await server_settings.has_guild(session, guild.id):
+                    await server_settings.add_guild(session, guild, {})
+                    logger.info(f'Added guild "{guild.name}"')
+
         logger.info("Bot started")
 
     async def load_cogs(self):
@@ -61,6 +68,14 @@ app = FastAPI(lifespan=lifespan)
 async def on_ready():
     """After bot is logged into discord"""
     await bot.tree.sync()
+
+
+@bot.event
+async def on_guild_join(guild: discord.Guild):
+    async with bot.db.create_session() as session:
+        if not await server_settings.has_guild(session, guild.id):
+            await server_settings.add_guild(session, guild, {})
+            logger.info(f'Added guild "{guild.name}"')
 
 
 @bot.event

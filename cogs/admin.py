@@ -31,7 +31,9 @@ class Admin(commands.Cog):
         async with self.bot.db.create_session() as session:
             if interaction.guild is None:
                 return []
-            role_groups = await discord_role_groups.get_all(session)
+            role_groups = await discord_role_groups.get_all(
+                session, interaction.guild.id
+            )
             return [
                 app_commands.Choice(name=role_group.name, value=role_group.name)
                 for role_group in role_groups
@@ -70,14 +72,16 @@ class Admin(commands.Cog):
             return  # is already set to guild_only
         async with self.bot.db.create_session() as session:
             existing_role = await discord_role_groups.get_by_name(
-                session, stats_item.value
+                session, interaction.guild.id, stats_item.value
             )
             if existing_role is not None:
                 await interaction.followup.send(
                     "Role group already exists", ephemeral=True
                 )
 
-            role_group = await discord_role_groups.create(session, stats_item.value)
+            role_group = await discord_role_groups.create(
+                session, interaction.guild.id, stats_item.value
+            )
             for index in range(min_role, max_role, step):
                 role_name = f"{stats_item.value} {index}-{index + step}"
 
@@ -88,8 +92,8 @@ class Admin(commands.Cog):
                     role_group.id,
                     role_name,
                     stats_item.value,
-                    min_role,
-                    max_role,
+                    index,
+                    index + step,
                 )
 
         await interaction.followup.send("Created the roles", ephemeral=True)
@@ -112,7 +116,9 @@ class Admin(commands.Cog):
             return  # is already set to guild_only
         async with self.bot.db.create_session() as session:
             try:
-                role_group = await discord_role_groups.get_by_name(session, stats_item)
+                role_group = await discord_role_groups.get_by_name(
+                    session, interaction.guild.id, stats_item
+                )
                 if role_group is None:
                     await interaction.response.send_message(
                         "Role does not exist", ephemeral=True
