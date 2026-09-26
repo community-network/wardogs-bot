@@ -7,6 +7,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from bot import WardogsBot
+from constants import stat_items
 from database.functions import discord_role_groups, discord_roles
 
 
@@ -46,13 +47,8 @@ class Admin(commands.Cog):
     @app_commands.checks.has_permissions(administrator=True)
     @app_commands.choices(
         stats_item=[
-            app_commands.Choice(name="infantry", value="infantry"),
-            app_commands.Choice(name="medic", value="medic"),
-            app_commands.Choice(name="recon", value="recon"),
-            app_commands.Choice(name="support", value="support"),
-            app_commands.Choice(name="driver", value="driver"),
-            app_commands.Choice(name="pilot", value="pilot"),
-            app_commands.Choice(name="cash", value="cash"),
+            app_commands.Choice(name=stat_item, value=stat_item)
+            for stat_item in stat_items.stat_items
         ]
     )
     @app_commands.describe(

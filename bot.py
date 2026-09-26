@@ -104,11 +104,11 @@ async def notify(
         ):
             stats = await get_stats(bot.config, state.get("discord_id", ""))
             if stats is not None:
-                await sync_roles(bot, state, stats)
                 embed = create_stats_embed(stats)
                 await channel.send(
                     content=f"<@{state.get('discord_id', '')}>", embed=embed
                 )
+                await sync_roles(bot, state, stats)
             else:
                 await channel.send(
                     content=f"<@{state.get('discord_id', '')}> Your WARDOGS account is linked, but no stat snapshot has been saved yet.",
