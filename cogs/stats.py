@@ -47,12 +47,12 @@ class Stats(commands.Cog):
             ),
         )
 
-        msg = await interaction.response.send_message(
+        await interaction.response.send_message(
             embed=embed,
             view=view,
             ephemeral=True,
         )
-        create_pending_state(id, interaction, msg.id)
+        create_pending_state(id, interaction)
 
     @app_commands.command(
         name="stats",

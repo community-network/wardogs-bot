@@ -104,10 +104,10 @@ async def notify(
     ),
 ):
     state = _get_pending_state(state_id)
-    if state is None:
+    if state is None or state.channel_id is None:
         return {"error": "State invalid"}
 
-    channel = bot.get_channel(state.get("channel_id", ""))
+    channel = bot.get_channel(state.channel_id)
     if channel is None:
         return {"error": "Channel not found"}
 
@@ -117,21 +117,17 @@ async def notify(
             and not isinstance(channel, discord.CategoryChannel)
             and not isinstance(channel, discord.ForumChannel)
         ):
-            stats = await get_stats(bot.config, state.get("discord_id", ""))
+            stats = await get_stats(bot.config, state.discord_id)
             if stats is not None:
                 embed = create_stats_embed(stats)
-                await channel.send(
-                    content=f"<@{state.get('discord_id', '')}>", embed=embed
-                )
+                await channel.send(content=f"<@{state.discord_id}>", embed=embed)
                 await sync_roles(bot, state, stats)
             else:
                 await channel.send(
-                    content=f"<@{state.get('discord_id', '')}> Your WARDOGS account is linked, but no stat snapshot has been saved yet.",
+                    content=f"<@{state.discord_id}> Your WARDOGS account is linked, but no stat snapshot has been saved yet.",
                 )
 
-            message = await channel.fetch_message(state.get("message_id", ""))
-            if message is not None:
-                await channel.delete_messages([message])
+            await state.interaction.delete_original_response()
 
         _consume_pending_state(state_id)
     except Exception as e:

@@ -5,24 +5,25 @@ from discord.ext import commands
 
 from client.models.player_stats import PlayerStats
 from database.functions import discord_role_groups
+from utils.create_update_url import State
 
 logger = logging.getLogger("admin")
 
 
-async def sync_roles(bot: commands.AutoShardedBot, state: dict, stats: PlayerStats):
-    guild = bot.get_guild(state.get("server_id", 0))
+async def sync_roles(bot: commands.AutoShardedBot, state: State, stats: PlayerStats):
+    if state.server_id is None:
+        return
+    guild = bot.get_guild(state.server_id)
     if guild is None:
         return
 
-    member = guild.get_member(state.get("discord_id", 0))
+    member = guild.get_member(state.discord_id)
     if member is None:
         return
 
     async with bot.db.create_session() as session:
         try:
-            role_groups = await discord_role_groups.get_all(
-                session, state.get("server_id", 0)
-            )
+            role_groups = await discord_role_groups.get_all(session, state.server_id)
             for role_group in role_groups:
                 for db_role in await role_group.awaitable_attrs.discord_roles:
                     level: int | None = None

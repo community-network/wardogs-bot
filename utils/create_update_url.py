@@ -1,11 +1,21 @@
 import threading
 import time
 import uuid
-
+from dataclasses import dataclass
 import discord
 import jwt
 
 from config import DiscordBot
+
+
+@dataclass
+class State:
+    server_id: int | None
+    channel_id: int | None
+    interaction: discord.Interaction[discord.Client]
+    discord_id: int
+    created_at: float
+
 
 _pending_states = {}
 _state_lock = threading.Lock()
@@ -32,17 +42,18 @@ def create_update_url(
 
 
 def create_pending_state(
-    state, interaction: discord.Interaction, message_id: int | None
+    state,
+    interaction: discord.Interaction,
 ):
     with _state_lock:
         _cleanup_expired_states_locked()
-        _pending_states[state] = {
-            "server_id": interaction.guild_id,
-            "channel_id": interaction.channel_id,
-            "message_id": message_id,
-            "discord_id": interaction.user.id,
-            "created_at": time.time(),
-        }
+        _pending_states[state] = State(
+            interaction.guild_id,
+            interaction.channel_id,
+            interaction,
+            interaction.user.id,
+            time.time(),
+        )
 
 
 def _cleanup_expired_states_locked():
@@ -51,23 +62,23 @@ def _cleanup_expired_states_locked():
     expired = [
         state
         for state, entry in _pending_states.items()
-        if (now - entry["created_at"] > STATE_LIFETIME_SECONDS)
+        if (now - entry.created_at > STATE_LIFETIME_SECONDS)
     ]
 
     for state in expired:
         _pending_states.pop(state, None)
 
 
-def _get_pending_state(state: str):
+def _get_pending_state(state: str) -> State | None:
     with _state_lock:
         _cleanup_expired_states_locked()
 
-        entry = _pending_states.get(state)
+        entry: State | None = _pending_states.get(state)
 
         if entry is None:
             return None
 
-        return dict(entry)
+        return entry
 
 
 def _consume_pending_state(state: str):
