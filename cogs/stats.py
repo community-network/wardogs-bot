@@ -7,7 +7,8 @@ from discord.ext import commands
 from kiota_abstractions.api_error import APIError
 
 from bot import WardogsBot
-from utils.create_update_url import create_pending_state, create_update_url
+from cogs.functions.start_update import start_update
+from utils.buttons import RefreshButton
 from utils.wardogs_api_client import (
     create_stats_embed,
     get_stats,
@@ -21,31 +22,13 @@ class Stats(commands.Cog):
         self.bot = bot
         self.logger = logging.getLogger("admin")
 
-    async def start_update(self, interaction, description):
-        login_url, id = create_update_url(
-            self.bot.config.bot, interaction.user.id, interaction.user.display_name
-        )
-        view = discord.ui.View(timeout=600)
-        view.add_item(
-            discord.ui.Button(
-                label="Sign in with Steam",
-                url=login_url,
-            )
-        )
-        embed = discord.Embed(title="Update WARDOGS Stats", description=description)
-
-        await interaction.response.send_message(
-            embed=embed,
-            view=view,
-            ephemeral=True,
-        )
-        create_pending_state(id, interaction)
-
     @app_commands.command(
         name="update", description="Sign in with Steam and update your WARDOGS stats."
     )
     async def update_command(self, interaction: discord.Interaction):
-        await self.start_update(
+        await interaction.response.defer()
+        await start_update(
+            self.bot,
             interaction,
             (
                 "Click **Sign in with Steam** below.\n\n"
@@ -70,14 +53,23 @@ class Stats(commands.Cog):
             stats = await get_stats(self.bot.config, user.id)
             if stats is not None:
                 embed = create_stats_embed(stats)
-                await interaction.followup.send(embed=embed)
+                view = discord.ui.View(timeout=600)
+                view.add_item(
+                    RefreshButton(
+                        self.bot,
+                        label="Refresh stats",
+                        custom_id="refresh_stats",
+                    )
+                )
+                await interaction.followup.send(embed=embed, view=view)
             elif member is not None:
                 await interaction.followup.send(
                     "Your WARDOGS account is linked, but no stat snapshot has been saved yet.",
                     ephemeral=True,
                 )
             else:
-                await self.start_update(
+                await start_update(
+                    self.bot,
                     interaction,
                     (
                         "Your WARDOGS account is linked, but no stat snapshot has been saved yet."
@@ -98,7 +90,8 @@ class Stats(commands.Cog):
                     ephemeral=True,
                 )
             else:
-                await self.start_update(
+                await start_update(
+                    self.bot,
                     interaction,
                     (
                         "Could not get any stats for the requested user."
