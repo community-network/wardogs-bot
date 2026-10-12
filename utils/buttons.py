@@ -11,6 +11,7 @@ class RefreshButton(discord.ui.Button):
         )
 
     async def callback(self, interaction: discord.Interaction) -> None:
+        await interaction.response.defer()
         # custom_id = interaction.data["custom_id"]
         await start_update(
             self.bot,

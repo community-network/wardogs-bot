@@ -19,7 +19,7 @@ async def start_update(
     )
     embed = discord.Embed(title="Update WARDOGS Stats", description=description)
 
-    await interaction.response.send_message(
+    await interaction.followup.send(
         embed=embed,
         view=view,
         ephemeral=True,
