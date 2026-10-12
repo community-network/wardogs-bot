@@ -26,7 +26,6 @@ class Stats(commands.Cog):
         name="update", description="Sign in with Steam and update your WARDOGS stats."
     )
     async def update_command(self, interaction: discord.Interaction):
-        await interaction.response.defer()
         await start_update(
             self.bot,
             interaction,
