@@ -21,10 +21,7 @@ class Stats(commands.Cog):
         self.bot = bot
         self.logger = logging.getLogger("admin")
 
-    @app_commands.command(
-        name="update", description="Sign in with Steam and update your WARDOGS stats."
-    )
-    async def update_command(self, interaction: discord.Interaction):
+    async def start_update(self, interaction, description):
         login_url, id = create_update_url(
             self.bot.config.bot, interaction.user.id, interaction.user.display_name
         )
@@ -35,9 +32,22 @@ class Stats(commands.Cog):
                 url=login_url,
             )
         )
-        embed = discord.Embed(
-            title="Update WARDOGS Stats",
-            description=(
+        embed = discord.Embed(title="Update WARDOGS Stats", description=description)
+
+        await interaction.response.send_message(
+            embed=embed,
+            view=view,
+            ephemeral=True,
+        )
+        create_pending_state(id, interaction)
+
+    @app_commands.command(
+        name="update", description="Sign in with Steam and update your WARDOGS stats."
+    )
+    async def update_command(self, interaction: discord.Interaction):
+        await self.start_update(
+            interaction,
+            (
                 "Click **Sign in with Steam** below.\n\n"
                 "After Steam authenticates your account, "
                 "your current WARDOGS stats will be "
@@ -46,13 +56,6 @@ class Stats(commands.Cog):
                 "and can only be used once."
             ),
         )
-
-        await interaction.response.send_message(
-            embed=embed,
-            view=view,
-            ephemeral=True,
-        )
-        create_pending_state(id, interaction)
 
     @app_commands.command(
         name="stats",
@@ -68,16 +71,46 @@ class Stats(commands.Cog):
             if stats is not None:
                 embed = create_stats_embed(stats)
                 await interaction.followup.send(embed=embed)
-            else:
+            elif member is not None:
                 await interaction.followup.send(
                     "Your WARDOGS account is linked, but no stat snapshot has been saved yet.",
                     ephemeral=True,
                 )
+            else:
+                await self.start_update(
+                    interaction,
+                    (
+                        "Your WARDOGS account is linked, but no stat snapshot has been saved yet."
+                        "Please try to update your stats\n\n"
+                        "Click **Sign in with Steam** below.\n\n"
+                        "After Steam authenticates your account, "
+                        "your current WARDOGS stats will be "
+                        "retrieved and saved.\n\n"
+                        "This login link expires after 10 minutes "
+                        "and can only be used once."
+                    ),
+                )
+
         except APIError as exc:
-            await interaction.followup.send(
-                "Could not get any stats for the requested user.",
-                ephemeral=True,
-            )
+            if member is not None:
+                await interaction.followup.send(
+                    "Could not get any stats for the requested user.",
+                    ephemeral=True,
+                )
+            else:
+                await self.start_update(
+                    interaction,
+                    (
+                        "Could not get any stats for the requested user."
+                        "Please try to update your stats\n\n"
+                        "Click **Sign in with Steam** below.\n\n"
+                        "After Steam authenticates your account, "
+                        "your current WARDOGS stats will be "
+                        "retrieved and saved.\n\n"
+                        "This login link expires after 10 minutes "
+                        "and can only be used once."
+                    ),
+                )
             if exc.response_status_code != 404:
                 self.logger.error(
                     f"Could not get stats for user {interaction.user.name}: {type(exc).__name__}: {exc}",

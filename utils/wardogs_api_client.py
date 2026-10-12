@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import discord
 from kiota_abstractions.authentication import AnonymousAuthenticationProvider
 from kiota_abstractions.base_request_configuration import RequestConfiguration
@@ -87,5 +89,9 @@ def create_stats_embed(stats: PlayerStats) -> discord.Embed:
         inline=True,
     )
 
-    embed.set_footer(text=(f"PlayerData version: {stats.player_data_version.integer}"))
+    embed.set_footer(
+        text=(
+            f"PlayerData version: {stats.player_data_version.integer}\nStats updated at {datetime.strptime(stats.created_at.string, '%Y-%m-%dT%H:%M:%SZ').strftime('%d %b %Y %H:%M')}"
+        )
+    )
     return embed

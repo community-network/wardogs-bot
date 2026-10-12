@@ -1,8 +1,8 @@
 {
-  "descriptionHash": "AFF080F38F5AFE4A5F61C370178E98701ED60539768A21659DE1390F9C73E5C8CC1DEB6B52C6C82AA6340054D4371C8780E16AE99DEBFF64AB279C83D9DF827F",
-  "descriptionLocation": "https://wardogs-api.gametools.network/openapi.json?",
+  "descriptionHash": "D76989C26512966B529DCA807AC262A860AFB65CECAF5B7869E33983F71C36DA0FC11858A8B7688E9122839A60FBA3257E7C38A93005D0AD13AECACA06D80EAD",
+  "descriptionLocation": "http://localhost:8787/openapi.json",
   "lockFileVersion": "1.0.0",
-  "kiotaVersion": "1.35.0",
+  "kiotaVersion": "1.36.0",
   "clientClassName": "WardogsApi",
   "typeAccessModifier": "Public",
   "clientNamespaceName": "client",

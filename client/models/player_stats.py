@@ -5,6 +5,7 @@ from kiota_abstractions.serialization import AdditionalDataHolder, Parsable, Par
 from typing import Any, Optional, TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
+    from .player_stats_created_at import PlayerStats_created_at
     from .player_stats_player_data_version import PlayerStats_player_data_version
     from .role_stats import RoleStats
     from .unlock_info import UnlockInfo
@@ -18,6 +19,8 @@ class PlayerStats(AdditionalDataHolder, Parsable):
     cash: Optional[int] = 0
     # The gold property
     gold: Optional[int] = 0
+    # The created_at property
+    created_at: Optional[PlayerStats_created_at] = None
     # The driver property
     driver: Optional[RoleStats] = None
     # The infantry property
@@ -53,16 +56,19 @@ class PlayerStats(AdditionalDataHolder, Parsable):
         The deserialization information for the current model
         Returns: dict[str, Callable[[ParseNode], None]]
         """
+        from .player_stats_created_at import PlayerStats_created_at
         from .player_stats_player_data_version import PlayerStats_player_data_version
         from .role_stats import RoleStats
         from .unlock_info import UnlockInfo
 
+        from .player_stats_created_at import PlayerStats_created_at
         from .player_stats_player_data_version import PlayerStats_player_data_version
         from .role_stats import RoleStats
         from .unlock_info import UnlockInfo
 
         fields: dict[str, Callable[[Any], None]] = {
             "cash": lambda n : setattr(self, 'cash', n.get_int_value()),
+            "created_at": lambda n : setattr(self, 'created_at', n.get_object_value(PlayerStats_created_at)),
             "driver": lambda n : setattr(self, 'driver', n.get_object_value(RoleStats)),
             "gold": lambda n : setattr(self, 'gold', n.get_int_value()),
             "infantry": lambda n : setattr(self, 'infantry', n.get_object_value(RoleStats)),
@@ -85,6 +91,7 @@ class PlayerStats(AdditionalDataHolder, Parsable):
         if writer is None:
             raise TypeError("writer cannot be null.")
         writer.write_int_value("cash", self.cash)
+        writer.write_object_value("created_at", self.created_at)
         writer.write_object_value("driver", self.driver)
         writer.write_int_value("gold", self.gold)
         writer.write_object_value("infantry", self.infantry)

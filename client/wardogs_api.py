@@ -16,6 +16,7 @@ from typing import Any, Optional, TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
     from .callback.callback_request_builder import CallbackRequestBuilder
+    from .snapshots.snapshots_request_builder import SnapshotsRequestBuilder
     from .stats.stats_request_builder import StatsRequestBuilder
     from .update.update_request_builder import UpdateRequestBuilder
 
@@ -48,6 +49,15 @@ class WardogsApi(BaseRequestBuilder):
         from .callback.callback_request_builder import CallbackRequestBuilder
 
         return CallbackRequestBuilder(self.request_adapter, self.path_parameters)
+    
+    @property
+    def snapshots(self) -> SnapshotsRequestBuilder:
+        """
+        The snapshots property
+        """
+        from .snapshots.snapshots_request_builder import SnapshotsRequestBuilder
+
+        return SnapshotsRequestBuilder(self.request_adapter, self.path_parameters)
     
     @property
     def stats(self) -> StatsRequestBuilder:

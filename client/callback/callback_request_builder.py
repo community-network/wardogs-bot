@@ -27,7 +27,7 @@ class CallbackRequestBuilder(BaseRequestBuilder):
         param request_adapter: The request adapter to use to execute the requests.
         Returns: None
         """
-        super().__init__(request_adapter, "{+baseurl}/callback{?state*}", path_parameters)
+        super().__init__(request_adapter, "{+baseurl}/callback{?redirect_url*,state*}", path_parameters)
     
     async def get(self,request_configuration: Optional[RequestConfiguration[CallbackRequestBuilderGetQueryParameters]] = None) -> Optional[bytes]:
         """
@@ -73,6 +73,9 @@ class CallbackRequestBuilder(BaseRequestBuilder):
         """
         Handles the callback from steam, logs in to Wardogs and save the gathered stats to the database
         """
+        # Url to return to after the process is complete, it adds "id" and "steam_id" to the url on success, and "error" on failure
+        redirect_url: Optional[str] = None
+
         # Token containing the discord connection
         state: Optional[str] = None
 
