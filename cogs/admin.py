@@ -9,20 +9,7 @@ from discord.ext import commands
 from bot import WardogsBot
 from constants import stat_items
 from database.functions import discord_role_groups, discord_roles
-from utils.buttons import RefreshButton
-
-
-class StatsUpdateView(discord.ui.View):
-    def __init__(self, bot: WardogsBot) -> None:
-        self.bot = bot
-        super().__init__(timeout=None)
-        self.add_item(
-            RefreshButton(
-                self.bot,
-                label="Get stats",
-                custom_id="refresh_stats",
-            )
-        )
+from views.stats_update import StatsUpdateView
 
 
 class Admin(commands.Cog):

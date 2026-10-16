@@ -8,11 +8,11 @@ from kiota_abstractions.api_error import APIError
 
 from bot import WardogsBot
 from cogs.functions.start_update import start_update
-from utils.buttons import RefreshButton
 from utils.wardogs_api_client import (
     create_stats_embed,
     get_stats,
 )
+from views.refresh_stats import RefreshStatsView
 
 
 class Stats(commands.Cog):
@@ -21,6 +21,7 @@ class Stats(commands.Cog):
     def __init__(self, bot: WardogsBot):
         self.bot = bot
         self.logger = logging.getLogger("admin")
+        self.bot.add_view(RefreshStatsView(bot))
 
     @app_commands.command(
         name="update", description="Sign in with Steam and update your WARDOGS stats."
@@ -53,14 +54,7 @@ class Stats(commands.Cog):
             stats = await get_stats(self.bot.config, user.id)
             if stats is not None:
                 embed = create_stats_embed(stats)
-                view = discord.ui.View(timeout=600)
-                view.add_item(
-                    RefreshButton(
-                        self.bot,
-                        label="Refresh stats",
-                        custom_id="refresh_stats",
-                    )
-                )
+                view = RefreshStatsView(self.bot)
                 await interaction.followup.send(embed=embed, view=view)
             elif member is not None:
                 await interaction.followup.send(

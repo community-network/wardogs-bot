@@ -14,6 +14,7 @@ from logger import setup_logger
 from utils.create_update_url import _consume_pending_state, _get_pending_state
 from utils.sync_roles import sync_roles
 from utils.wardogs_api_client import create_stats_embed, get_stats
+from views.refresh_stats import RefreshStatsView
 
 env_config = load_config()
 
@@ -143,7 +144,10 @@ async def notify(
             stats = await get_stats(bot.config, state.discord_id)
             if stats is not None:
                 embed = create_stats_embed(stats)
-                await channel.send(content=f"<@{state.discord_id}>", embed=embed)
+                view = RefreshStatsView(bot)
+                await channel.send(
+                    content=f"<@{state.discord_id}>", embed=embed, view=view
+                )
                 await sync_roles(bot, state, stats)
             else:
                 await channel.send(

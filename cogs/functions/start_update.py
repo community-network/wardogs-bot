@@ -1,12 +1,9 @@
 import discord
 
-from bot import WardogsBot
 from utils.create_update_url import create_pending_state, create_update_url
 
 
-async def start_update(
-    bot: WardogsBot, interaction: discord.Interaction, description: str
-):
+async def start_update(bot, interaction: discord.Interaction, description: str):
     login_url, id = create_update_url(
         bot.config.bot, interaction.user.id, interaction.user.display_name
     )
