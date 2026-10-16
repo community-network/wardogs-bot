@@ -50,12 +50,35 @@ class WardogsBot(commands.AutoShardedBot):
                 self.logger.info(f"Loaded cog: {name}")
 
 
+async def run_bot_forever():
+    while True:
+        try:
+            await bot.start(env_config.bot.discord_bot_token)
+
+        except asyncio.CancelledError:
+            raise
+
+        except Exception:
+            logger.exception("Bot crashed, restarting in 10 seconds")
+            await asyncio.sleep(10)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    asyncio.create_task(bot.start(env_config.bot.discord_bot_token))
-    yield
-    await bot.close()
-    await bot.db.close_async()
+    bot_task = asyncio.create_task(run_bot_forever())
+    try:
+        yield
+
+    finally:
+        bot_task.cancel()
+
+        try:
+            await bot_task
+        except asyncio.CancelledError:
+            pass
+
+        await bot.close()
+        await bot.db.close_async()
 
 
 intents = discord.Intents.default()
