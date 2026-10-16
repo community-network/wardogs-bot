@@ -9,16 +9,32 @@ from discord.ext import commands
 from bot import WardogsBot
 from constants import stat_items
 from database.functions import discord_role_groups, discord_roles
+from utils.buttons import RefreshButton
+
+
+class StatsUpdateView(discord.ui.View):
+    def __init__(self, bot: WardogsBot) -> None:
+        self.bot = bot
+        super().__init__(timeout=None)
+        self.add_item(
+            RefreshButton(
+                self.bot,
+                label="Get stats",
+                custom_id="refresh_stats",
+            )
+        )
 
 
 class Admin(commands.Cog):
     def __init__(self, bot: WardogsBot):
         self.bot = bot
         self.logger = logging.getLogger("admin")
+        self.bot.add_view(StatsUpdateView(bot))
 
     group = app_commands.Group(
         name="admin", description="Commands meant only for admins"
     )
+    stats = app_commands.Group(name="stats", description="Stats commands", parent=group)
 
     roles = app_commands.Group(name="roles", description="Roles commands", parent=group)
 
@@ -39,6 +55,20 @@ class Admin(commands.Cog):
                 for role_group in role_groups
                 if role_group.name.lower().startswith(current.lower())
             ][:25]
+
+    @stats.command(name="generate", description="Generate a public stats update button")
+    @app_commands.guild_only()
+    @app_commands.default_permissions(administrator=True)
+    @app_commands.checks.has_permissions(administrator=True)
+    async def generate_stats_update(self, interaction: discord.Interaction) -> None:
+        """Generate a public stats update button."""
+        embed = discord.Embed(
+            title="View your Wardogs stats",
+            description="Click the button below to get your Wardogs stats posted here",
+            color=discord.Color.blurple(),
+        )
+        view = StatsUpdateView(self.bot)
+        await interaction.response.send_message(embed=embed, view=view)
 
     @roles.command(
         name="generate",
